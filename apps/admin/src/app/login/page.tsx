@@ -28,23 +28,34 @@ export default function LoginPage(): ReactElement {
     router.push("/dashboard");
   };
   return (
-    <PageShell title="Admin login">
-      <form onSubmit={(e) => void onSubmit(e)}>
-        <label>
-          Email
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
-        </label>
-        <label>
-          Password
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            required
-          />
-        </label>
-        <button type="submit">Sign in</button>
-      </form>
+    <PageShell
+      eyebrow="Operations console"
+      title="Admin login"
+      subtitle="Review scraper jobs, publish draft intel, and monitor source health from one control room."
+    >
+      <section className="hero-panel">
+        <div className="hero-content">
+          <p className="eyebrow">Secure access</p>
+          <h2>Enter the command deck</h2>
+          <p>Use the bootstrap admin account created during local server deployment.</p>
+        </div>
+        <form onSubmit={(e) => void onSubmit(e)}>
+          <label>
+            Email
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+          </label>
+          <label>
+            Password
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              required
+            />
+          </label>
+          <button type="submit">Sign in</button>
+        </form>
+      </section>
       {errorMessage ? <p role="alert">{errorMessage}</p> : null}
     </PageShell>
   );

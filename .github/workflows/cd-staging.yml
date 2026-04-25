@@ -1,0 +1,12 @@
+name: cd-staging
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo "Wire this workflow to your VPS or container registry for staging deploys."

@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "FFXIV Guide Engine",
+    "slug": "ffxiv-guide-engine",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "platforms": ["ios", "android", "web"],
+    "scheme": "ffxivguide",
+    "extra": {
+      "apiUrl": "http://localhost:3001"
+    }
+  }
+}

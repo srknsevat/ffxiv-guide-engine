@@ -1,0 +1,15 @@
+node_modules
+dist
+.next
+.turbo
+*.log
+.env
+.env.local
+.env.*.local
+coverage
+.DS_Store
+*.tsbuildinfo
+apps/mobile/.expo
+apps/mobile/dist
+apps/mobile/web-build
+mikro-orm.config.js.map

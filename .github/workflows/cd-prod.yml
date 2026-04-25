@@ -1,0 +1,12 @@
+name: cd-prod
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo "Wire this workflow to production deploy (Docker registry + VPS pull)."

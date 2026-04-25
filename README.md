@@ -68,6 +68,28 @@ Services:
 - Postgres: `localhost:55432`
 - Redis: `localhost:6379`
 
+## Coolify
+
+Use `docker-compose.coolify.yml` when deploying as a Coolify Docker Compose application.
+
+Expose these services through Coolify domains:
+
+- `web` on container port `3000`
+- `admin` on container port `3002`
+- `api` on container port `3001`
+
+Do not expose `postgres`, `redis`, or `scraper` publicly.
+
+Required production variables:
+
+- `JWT_SECRET`
+- `INTERNAL_API_TOKEN`
+- `POSTGRES_PASSWORD`
+- `BOOTSTRAP_ADMIN_EMAIL`
+- `BOOTSTRAP_ADMIN_PASSWORD`
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_API_URL`
+
 ## CI
 
 GitHub Actions workflow `.github/workflows/ci.yml` runs lint, typecheck, build, and tests on pushes and PRs to `main` and `develop`.

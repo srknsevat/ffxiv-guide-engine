@@ -61,6 +61,11 @@ button,
   font-weight: 800;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 input,
 select {
   min-height: 42px;
@@ -87,9 +92,9 @@ form {
 }
 
 .app-shell {
-  width: min(1180px, calc(100% - 32px));
+  width: min(1120px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 28px 0 64px;
+  padding: 24px 0 56px;
 }
 
 .shell-header,
@@ -103,9 +108,9 @@ form {
 
 .shell-header h1 {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 4rem);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
+  font-size: clamp(1.85rem, 4vw, 3.15rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
 .shell-subtitle,
@@ -148,14 +153,14 @@ form {
   display: grid;
   gap: 18px;
   margin-bottom: 24px;
-  padding: 28px;
-  border-radius: 28px;
+  padding: 24px;
+  border-radius: 24px;
 }
 
 .hero-content h2,
 .section-header h2 {
   margin: 0;
-  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  font-size: clamp(1.35rem, 2.5vw, 2rem);
   letter-spacing: -0.04em;
 }
 
@@ -173,11 +178,11 @@ form {
 }
 
 .metric-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
 .guide-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .admin-grid {
@@ -204,7 +209,7 @@ form {
   display: block;
   margin-top: 10px;
   color: var(--blue);
-  font-size: 2rem;
+  font-size: 1.65rem;
 }
 
 .metric-gold strong {
@@ -222,7 +227,18 @@ form {
 }
 
 .guide-card {
-  min-height: 190px;
+  min-height: 180px;
+}
+
+.editorial-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.editorial-card p {
+  flex: 1;
+  margin: 0;
 }
 
 .guide-card h3 {
@@ -313,6 +329,19 @@ form {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.dashboard-message {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  line-height: 1.5;
+}
+
+.dashboard-message-danger {
+  border: 1px solid rgba(255, 123, 143, 0.35);
+  background: rgba(255, 123, 143, 0.1);
+  color: var(--red);
+}
+
 @media (max-width: 920px) {
   .metric-grid,
   .guide-grid,
@@ -323,8 +352,19 @@ form {
 
 @media (max-width: 620px) {
   .app-shell {
-    width: min(100% - 20px, 1180px);
-    padding-top: 16px;
+    width: min(100% - 24px, 1120px);
+    padding-top: 14px;
+  }
+  .shell-header h1 {
+    font-size: clamp(1.7rem, 10vw, 2.45rem);
+  }
+  .hero-panel,
+  .metric-card,
+  .guide-card,
+  .content-panel,
+  .source-panel {
+    padding: 18px;
+    border-radius: 20px;
   }
   .shell-header,
   .section-header {

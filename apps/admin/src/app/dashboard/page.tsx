@@ -1,10 +1,10 @@
 "use client";
 
 import type { GuideSummaryDto, ScraperJobDto } from "@ffxiv-guide-engine/types";
-import { GuideCard, MetricCard, PageShell, SectionHeader, StatusBadge } from "@ffxiv-guide-engine/ui";
+import { MetricCard, PageShell, SectionHeader, StatusBadge } from "@ffxiv-guide-engine/ui";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactElement } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getApiBaseUrl } from "@/lib/api-base-url";
 
 type SourceHealth = Readonly<{
@@ -36,6 +36,11 @@ export default function DashboardPage(): ReactElement {
   const [sourceKey, setSourceKey] = useState("lodestone-news");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [publishingGuideId, setPublishingGuideId] = useState<string | null>(null);
+  const [retryingJobId, setRetryingJobId] = useState<string | null>(null);
+  const [isEnqueuing, setIsEnqueuing] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("accessToken");
@@ -46,88 +51,114 @@ export default function DashboardPage(): ReactElement {
     setToken(stored);
   }, [router]);
 
-  useEffect(() => {
+  const loadDashboardData = useCallback(async (): Promise<void> => {
     if (!token) {
       return;
     }
+    setErrorMessage(null);
+    setIsLoadingData(true);
     const baseUrl = getApiBaseUrl();
     const headers = { Authorization: `Bearer ${token}` };
-    void (async () => {
+    try {
       const jobResponse = await fetch(`${baseUrl}/api/jobs`, { headers });
-      if (jobResponse.ok) {
-        setJobs((await jobResponse.json()) as ScraperJobDto[]);
+      if (!jobResponse.ok) {
+        throw new Error("Jobs could not be loaded.");
       }
       const sourceResponse = await fetch(`${baseUrl}/api/sources/health`, { headers });
-      if (sourceResponse.ok) {
-        setSources((await sourceResponse.json()) as SourceHealth[]);
+      if (!sourceResponse.ok) {
+        throw new Error("Source health could not be loaded.");
       }
       const guidesResponse = await fetch(`${baseUrl}/api/guides/admin/all`, { headers });
-      if (guidesResponse.ok) {
-        setGuides((await guidesResponse.json()) as GuideSummaryDto[]);
+      if (!guidesResponse.ok) {
+        throw new Error("Guides could not be loaded.");
       }
-    })();
+      setJobs((await jobResponse.json()) as ScraperJobDto[]);
+      setSources((await sourceResponse.json()) as SourceHealth[]);
+      setGuides((await guidesResponse.json()) as GuideSummaryDto[]);
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Dashboard data could not be loaded.");
+    } finally {
+      setIsLoadingData(false);
+    }
   }, [token]);
+
+  useEffect(() => {
+    void loadDashboardData();
+  }, [loadDashboardData]);
 
   const onEnqueue = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
     if (!token) {
       return;
     }
-    const response = await fetch(`${getApiBaseUrl()}/api/jobs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ sourceKey })
-    });
-    if (!response.ok) {
-      return;
+    setIsEnqueuing(true);
+    setErrorMessage(null);
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/jobs`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ sourceKey })
+      });
+      if (!response.ok) {
+        throw new Error("Scraper job could not be enqueued.");
+      }
+      await loadDashboardData();
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Scraper job could not be enqueued.");
+    } finally {
+      setIsEnqueuing(false);
     }
-    const job = (await response.json()) as ScraperJobDto;
-    setJobs((previous) => [job, ...previous]);
   };
 
   const onRetry = async (jobId: string): Promise<void> => {
     if (!token) {
       return;
     }
-    const response = await fetch(`${getApiBaseUrl()}/api/jobs/${jobId}/retry`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
+    setRetryingJobId(jobId);
+    setErrorMessage(null);
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/jobs/${jobId}/retry`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error("Failed job could not be retried.");
       }
-    });
-    if (!response.ok) {
-      return;
+      await loadDashboardData();
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Failed job could not be retried.");
+    } finally {
+      setRetryingJobId(null);
     }
-    const retried = (await response.json()) as ScraperJobDto;
-    setJobs((previous) => previous.map((item) => (item.id === retried.id ? retried : item)));
   };
 
   const onPublish = async (guideId: string): Promise<void> => {
     if (!token) {
       return;
     }
-    const response = await fetch(`${getApiBaseUrl()}/api/guides/${guideId}/publish`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
+    setPublishingGuideId(guideId);
+    setErrorMessage(null);
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/guides/${guideId}/publish`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error("Guide could not be published.");
       }
-    });
-    if (!response.ok) {
-      return;
+      await loadDashboardData();
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Guide could not be published.");
+    } finally {
+      setPublishingGuideId(null);
     }
-    setGuides((previous) =>
-      previous.map((item) =>
-        item.id === guideId
-          ? {
-              ...item,
-              isPublished: true
-            }
-          : item
-      )
-    );
   };
 
   const categoryOptions: string[] = Array.from(new Set(guides.map((guide) => guide.category))).sort();
@@ -153,7 +184,17 @@ export default function DashboardPage(): ReactElement {
       eyebrow="Operations console"
       title="Command deck"
       subtitle="Monitor source health, run ingestion jobs, and approve draft intel before it reaches players."
+      actions={
+        <button disabled={isLoadingData} onClick={() => void loadDashboardData()} type="button">
+          {isLoadingData ? "Refreshing..." : "Refresh data"}
+        </button>
+      }
     >
+      {errorMessage ? (
+        <p className="dashboard-message dashboard-message-danger" role="alert">
+          {errorMessage}
+        </p>
+      ) : null}
       <section className="metric-grid">
         <MetricCard label="Guides" value={String(guides.length)} detail="Total content records" tone="blue" />
         <MetricCard label="Drafts" value={String(draftGuides.length)} detail="Waiting for review" tone="gold" />
@@ -171,7 +212,9 @@ export default function DashboardPage(): ReactElement {
             Source key
             <input value={sourceKey} onChange={(event) => setSourceKey(event.target.value)} />
           </label>
-          <button type="submit">Enqueue</button>
+          <button disabled={isEnqueuing} type="submit">
+            {isEnqueuing ? "Enqueuing..." : "Enqueue"}
+          </button>
         </form>
       </section>
       <div className="admin-grid">
@@ -186,8 +229,12 @@ export default function DashboardPage(): ReactElement {
                 </div>
                 {job.errorMessage ? <p>{job.errorMessage}</p> : null}
                 {job.status === "failed" ? (
-                  <button onClick={() => void onRetry(job.id)} type="button">
-                    Retry
+                  <button
+                    disabled={retryingJobId === job.id}
+                    onClick={() => void onRetry(job.id)}
+                    type="button"
+                  >
+                    {retryingJobId === job.id ? "Retrying..." : "Retry"}
                   </button>
                 ) : null}
               </li>
@@ -236,17 +283,29 @@ export default function DashboardPage(): ReactElement {
         </div>
         <div className="guide-grid">
           {filteredGuides.map((guide) => (
-            <article className="guide-card" key={guide.id}>
-              <GuideCard
-                title={guide.title}
-                summary={guide.summary}
-                category={guide.category}
-                tags={guide.tags}
-                statusLabel={guide.isPublished ? "published" : "draft"}
-              />
+            <article className="guide-card editorial-card" key={guide.id}>
+              <div className="card-topline">
+                <StatusBadge tone={guide.isPublished ? "success" : "warning"}>
+                  {guide.isPublished ? "published" : "draft"}
+                </StatusBadge>
+                <span className="category-pill">{guide.category}</span>
+              </div>
+              <h3>{guide.title}</h3>
+              <p>{guide.summary}</p>
+              <div className="tag-row">
+                {guide.tags.map((tag) => (
+                  <span className="tag" key={tag}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
               {!guide.isPublished ? (
-                <button onClick={() => void onPublish(guide.id)} type="button">
-                  Publish
+                <button
+                  disabled={publishingGuideId === guide.id}
+                  onClick={() => void onPublish(guide.id)}
+                  type="button"
+                >
+                  {publishingGuideId === guide.id ? "Publishing..." : "Publish"}
                 </button>
               ) : null}
             </article>

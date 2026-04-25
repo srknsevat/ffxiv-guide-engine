@@ -50,9 +50,9 @@ select {
 }
 
 .app-shell {
-  width: min(1180px, calc(100% - 32px));
+  width: min(1120px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 28px 0 64px;
+  padding: 24px 0 56px;
 }
 
 .shell-header {
@@ -65,9 +65,9 @@ select {
 
 .shell-header h1 {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 4.5rem);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
+  font-size: clamp(1.9rem, 4vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
 .shell-subtitle {
@@ -102,9 +102,9 @@ select {
   gap: 28px;
   overflow: hidden;
   margin-bottom: 28px;
-  padding: clamp(28px, 5vw, 56px);
+  padding: clamp(24px, 4vw, 42px);
   border: 1px solid var(--border);
-  border-radius: 32px;
+  border-radius: 28px;
   background:
     linear-gradient(135deg, rgba(15, 23, 41, 0.95), rgba(16, 33, 56, 0.78)),
     radial-gradient(circle at top right, rgba(107, 215, 255, 0.18), transparent 28rem);
@@ -131,17 +131,17 @@ select {
 .hero-content h2 {
   max-width: 760px;
   margin: 0;
-  font-size: clamp(2.5rem, 7vw, 6rem);
-  line-height: 0.9;
-  letter-spacing: -0.08em;
+  font-size: clamp(2rem, 5vw, 4.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.06em;
 }
 
 .hero-content p:not(.eyebrow) {
   max-width: 680px;
   margin: 22px 0 0;
   color: var(--muted);
-  font-size: 1.08rem;
-  line-height: 1.8;
+  font-size: 1rem;
+  line-height: 1.72;
 }
 
 .hero-stats {
@@ -171,7 +171,7 @@ select {
 .hero-stat strong {
   display: block;
   color: var(--gold);
-  font-size: 2rem;
+  font-size: 1.55rem;
   line-height: 1;
 }
 
@@ -214,7 +214,7 @@ select {
 
 .section-header h2 {
   margin: 0;
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-size: clamp(1.35rem, 2.5vw, 2rem);
   letter-spacing: -0.04em;
 }
 
@@ -233,23 +233,23 @@ select {
 }
 
 .category-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 }
 
 .guide-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 .metric-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
 .guide-card {
   display: flex;
-  min-height: 250px;
+  min-height: 220px;
   flex-direction: column;
-  padding: 22px;
-  border-radius: 24px;
+  padding: 20px;
+  border-radius: 22px;
   transition:
     transform 160ms ease,
     border-color 160ms ease,
@@ -369,7 +369,7 @@ select {
 .metric-card strong {
   display: block;
   margin-top: 12px;
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   line-height: 1;
 }
 
@@ -457,8 +457,18 @@ select {
 
 @media (max-width: 620px) {
   .app-shell {
-    width: min(100% - 20px, 1180px);
-    padding-top: 16px;
+    width: min(100% - 24px, 1120px);
+    padding-top: 14px;
+  }
+  .shell-header h1 {
+    font-size: clamp(1.7rem, 10vw, 2.5rem);
+  }
+  .hero-panel {
+    padding: 20px;
+    border-radius: 22px;
+  }
+  .hero-content h2 {
+    font-size: clamp(1.85rem, 12vw, 3rem);
   }
   .shell-header,
   .section-header {

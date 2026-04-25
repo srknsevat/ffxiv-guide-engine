@@ -6,7 +6,7 @@ import type { NormalizedGuide } from "./normalized-guide";
 import type { SourceAdapter } from "./source-adapter";
 
 const LODESTONE_NEWS_RSS_URL =
-  "https://na.finalfantasyxiv.com/lodestone/topics/rss?all=1";
+  "https://na.finalfantasyxiv.com/lodestone/news/news.xml";
 
 type LodestoneItem = Readonly<{
   title: string;
@@ -38,6 +38,16 @@ function decodeHtmlEntities(value: string): string {
 
 function sanitizeText(value: string): string {
   return decodeHtmlEntities(stripCdata(value).replace(/<[^>]+>/g, "")).trim();
+}
+
+function extractTagValue(xml: string, tagName: string): string | null {
+  const match = xml.match(new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`));
+  return match ? sanitizeText(match[1]) : null;
+}
+
+function extractAlternateLink(xml: string): string | null {
+  const match = xml.match(/<link[^>]+rel="alternate"[^>]+href="([^"]+)"[^>]*>/);
+  return match ? stripCdata(match[1]) : null;
 }
 
 function createSlug(input: string): string {
@@ -72,21 +82,22 @@ export function classifyLodestoneItem(item: LodestoneItem): Classification {
 }
 
 export function parseLodestoneRss(xml: string): LodestoneItem[] {
-  const itemMatches = xml.match(/<item>[\s\S]*?<\/item>/g) ?? [];
+  const itemMatches = xml.match(/<entry>[\s\S]*?<\/entry>/g) ?? xml.match(/<item>[\s\S]*?<\/item>/g) ?? [];
   return itemMatches
     .map((itemXml) => {
-      const titleMatch = itemXml.match(/<title>([\s\S]*?)<\/title>/);
-      const linkMatch = itemXml.match(/<link>([\s\S]*?)<\/link>/);
-      const descriptionMatch = itemXml.match(/<description>([\s\S]*?)<\/description>/);
-      const pubDateMatch = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
-      if (!titleMatch || !linkMatch || !descriptionMatch || !pubDateMatch) {
+      const title = extractTagValue(itemXml, "title");
+      const link = extractAlternateLink(itemXml) ?? extractTagValue(itemXml, "link");
+      const description =
+        extractTagValue(itemXml, "content") ?? extractTagValue(itemXml, "summary") ?? extractTagValue(itemXml, "description");
+      const pubDate = extractTagValue(itemXml, "published") ?? extractTagValue(itemXml, "updated") ?? extractTagValue(itemXml, "pubDate");
+      if (!title || !link || !description || !pubDate) {
         return null;
       }
       return {
-        title: sanitizeText(titleMatch[1]),
-        link: stripCdata(linkMatch[1]),
-        description: sanitizeText(descriptionMatch[1]),
-        pubDate: sanitizeText(pubDateMatch[1])
+        title,
+        link,
+        description,
+        pubDate
       } satisfies LodestoneItem;
     })
     .filter((item): item is LodestoneItem => item !== null)

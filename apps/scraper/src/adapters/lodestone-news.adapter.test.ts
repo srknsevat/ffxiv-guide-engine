@@ -19,6 +19,24 @@ test("parseLodestoneRss parses rss items", () => {
   assert.equal(actual[0].link, "https://example.com/news-1");
 });
 
+test("parseLodestoneRss parses lodestone atom entries", () => {
+  const xml = `
+  <feed>
+    <entry>
+      <title>Emergency Maintenance</title>
+      <link rel="alternate" type="text/html" href="https://example.com/news-2" />
+      <published>2026-04-24T14:35:00Z</published>
+      <summary>Maintenance details</summary>
+    </entry>
+  </feed>
+  `;
+  const actual = parseLodestoneRss(xml);
+  assert.equal(actual.length, 1);
+  assert.equal(actual[0].title, "Emergency Maintenance");
+  assert.equal(actual[0].link, "https://example.com/news-2");
+  assert.equal(actual[0].pubDate, "2026-04-24T14:35:00Z");
+});
+
 test("classifyLodestoneItem categorizes patch notes", () => {
   const actual = classifyLodestoneItem({
     title: "Patch 7.1 Notes",
